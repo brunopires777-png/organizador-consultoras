@@ -319,19 +319,22 @@
 
   .segmento{
     display:flex;
-    gap:8px;
+    gap:5px;
+    min-width:0;
   }
   .segbtn{
     flex:1;
-    padding:9px 8px;
+    min-width:0;
+    padding:8px 4px;
     border:1.5px solid var(--parchment-deep);
     background:var(--white);
-    border-radius:9px;
-    font-size:13.5px;
+    border-radius:8px;
+    font-size:11.5px;
     font-weight:600;
     color:var(--ink-soft);
     cursor:pointer;
     transition:all .12s ease;
+    white-space:nowrap;
   }
   .segbtn.selecionado{
     background:var(--oxblood);
@@ -487,6 +490,46 @@
   .pill-ativo{background:var(--ativo-bg);color:var(--ativo);}
   .pill-inativo{background:var(--inativo-bg);color:var(--inativo);}
   .pill .num{font-family:var(--mono);font-size:15px;}
+
+  /* ---- Grupos por nível ---- */
+  .grupo-nivel{margin-bottom:6px;}
+  .grupo-nivel-cabecalho{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:11px 12px;
+    background:var(--paper);
+    border:1px solid var(--parchment-deep);
+    border-left:5px solid var(--cor-grupo, var(--parchment-deep));
+    border-radius:11px;
+    cursor:pointer;
+    margin-bottom:8px;
+  }
+  .grupo-nivel-titulo{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-weight:700;
+    font-size:14px;
+    color:var(--ink);
+  }
+  .grupo-nivel-contagem{
+    color:var(--ink-soft);
+    font-weight:600;
+    font-size:12px;
+    font-family:var(--mono);
+  }
+  .seta-grupo{color:var(--brass);transition:transform .18s ease;flex-shrink:0;}
+  .grupo-nivel.aberto .seta-grupo{transform:rotate(180deg);}
+  .grupo-nivel-corpo{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .25s ease;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .grupo-nivel.aberto .grupo-nivel-corpo{max-height:12000px;padding-bottom:4px;}
 
   /* ---- Lista ---- */
   #lista-consultoras{
@@ -798,6 +841,17 @@
             </div>
           </div>
           <div class="campo">
+            <label>Nível</label>
+            <select id="f-nivel">
+              <option value="">Todos</option>
+              <option value="Cristal">Cristal</option>
+              <option value="Bronze">Bronze</option>
+              <option value="Prata">Prata</option>
+              <option value="Ouro">Ouro</option>
+              <option value="Diamante">Diamante</option>
+            </select>
+          </div>
+          <div class="campo">
             <label>Bairro</label>
             <input type="text" id="f-bairro" placeholder="Bairro">
           </div>
@@ -1060,6 +1114,7 @@ document.querySelectorAll("[data-fcivil]").forEach((btn) => {
 
 document.getElementById("f-idade").addEventListener("change", renderizarLista);
 document.getElementById("f-mes").addEventListener("change", renderizarLista);
+document.getElementById("f-nivel").addEventListener("change", renderizarLista);
 document.getElementById("f-bairro").addEventListener("input", renderizarLista);
 document.getElementById("busca-nome").addEventListener("input", renderizarLista);
 
@@ -1068,6 +1123,7 @@ document.getElementById("btn-limpar-filtro").addEventListener("click", () => {
   document.querySelectorAll("[data-fcivil]").forEach((b) => b.classList.remove("selecionado"));
   campo("f-idade").value = "";
   campo("f-mes").value = "";
+  campo("f-nivel").value = "";
   campo("f-bairro").value = "";
   renderizarLista();
 });
@@ -1075,14 +1131,19 @@ document.getElementById("btn-limpar-filtro").addEventListener("click", () => {
 /* ============================================================
    NÍVEL — calculado automaticamente pela pontuação (não é editável)
    ============================================================ */
+const NIVEIS = [
+  { nome:"Diamante", min:5500, cor:"#4FB8C9", texto:"#0B2E33" },
+  { nome:"Ouro",     min:2200, cor:"#C9962C", texto:"#3B2A08" },
+  { nome:"Prata",    min:900,  cor:"#9AA0A6", texto:"#2A2C2E" },
+  { nome:"Bronze",   min:300,  cor:"#A5672D", texto:"#FBF0E4" },
+  { nome:"Cristal",  min:0,    cor:"#6FA0BF", texto:"#EAF4FA" }
+];
+const ORDEM_NIVEIS = ["Cristal","Bronze","Prata","Ouro","Diamante"];
+
 function calcularNivel(pontos){
   if(pontos === null || pontos === undefined || pontos === "" || isNaN(Number(pontos))) return null;
   const p = Number(pontos);
-  if(p >= 5500) return { nome:"Diamante", cor:"#4FB8C9", texto:"#0B2E33" };
-  if(p >= 2200) return { nome:"Ouro",     cor:"#C9962C", texto:"#3B2A08" };
-  if(p >= 900)  return { nome:"Prata",    cor:"#9AA0A6", texto:"#2A2C2E" };
-  if(p >= 300)  return { nome:"Bronze",   cor:"#A5672D", texto:"#FBF0E4" };
-  return              { nome:"Cristal",  cor:"#6FA0BF", texto:"#EAF4FA" };
+  return NIVEIS.find((n) => p >= n.min);
 }
 
 function obterDataCadastroPartes(c){
@@ -1144,6 +1205,7 @@ function formatarDias(qtdDias){
    LISTA EM TEMPO REAL (Firestore)
    ============================================================ */
 let todasConsultoras = [];
+let gruposAbertos = new Set();
 
 // clicar fora de qualquer cartão aberto descarta edições não salvas e fecha
 document.addEventListener("click", (e) => {
@@ -1170,6 +1232,7 @@ function renderizarLista(){
   const termoBusca = campo("busca-nome").value.trim().toLowerCase();
   const idadeFiltro = campo("f-idade").value;
   const mesFiltro = campo("f-mes").value;
+  const nivelFiltro = campo("f-nivel").value;
   const bairroFiltro = campo("f-bairro").value.trim().toLowerCase();
 
   const filtradas = todasConsultoras.filter((c) => {
@@ -1178,6 +1241,10 @@ function renderizarLista(){
     if(mesFiltro !== "" && String(Number(c.nascMes)) !== mesFiltro) return false;
     if(filtroCivil && c.estadoCivil !== filtroCivil) return false;
     if(bairroFiltro && !(c.bairro || "").toLowerCase().includes(bairroFiltro)) return false;
+    if(nivelFiltro){
+      const info = calcularNivel(c.pontos);
+      if(!info || info.nome !== nivelFiltro) return false;
+    }
     return true;
   });
 
@@ -1198,7 +1265,48 @@ function renderizarLista(){
     return;
   }
 
-  lista.innerHTML = filtradas.map((c) => montarCartao(c, idsExpandidos.has(c.id))).join("");
+  // agrupa por nível (Cristal, Bronze, Prata, Ouro, Diamante, e sem pontuação)
+  const grupos = {};
+  filtradas.forEach((c) => {
+    const info = calcularNivel(c.pontos);
+    const chave = info ? info.nome : "_sem_pontuacao";
+    if(!grupos[chave]) grupos[chave] = [];
+    grupos[chave].push(c);
+  });
+  const chavesOrdenadas = [...ORDEM_NIVEIS, "_sem_pontuacao"].filter((k) => grupos[k]);
+
+  lista.innerHTML = chavesOrdenadas.map((chave) => {
+    const itens = grupos[chave];
+    const infoNivel = NIVEIS.find((n) => n.nome === chave);
+    const titulo = infoNivel ? infoNivel.nome : "Sem pontuação";
+    const cor = infoNivel ? infoNivel.cor : "var(--parchment-deep)";
+    const aberto = gruposAbertos.has(chave);
+    return `
+    <div class="grupo-nivel ${aberto ? "aberto" : ""}" data-grupo="${chave}">
+      <div class="grupo-nivel-cabecalho" style="--cor-grupo:${cor};">
+        <span class="grupo-nivel-titulo">${escapeHtml(titulo)} <span class="grupo-nivel-contagem">(${itens.length})</span></span>
+        <span class="seta-grupo">&#9660;</span>
+      </div>
+      <div class="grupo-nivel-corpo">
+        ${itens.map((c) => montarCartao(c, idsExpandidos.has(c.id))).join("")}
+      </div>
+    </div>`;
+  }).join("");
+
+  // eventos: abrir/fechar grupo de nível
+  lista.querySelectorAll(".grupo-nivel-cabecalho").forEach((el) => {
+    el.addEventListener("click", () => {
+      const grupoEl = el.closest(".grupo-nivel");
+      const chave = grupoEl.dataset.grupo;
+      if(gruposAbertos.has(chave)){
+        gruposAbertos.delete(chave);
+        grupoEl.classList.remove("aberto");
+      } else {
+        gruposAbertos.add(chave);
+        grupoEl.classList.add("aberto");
+      }
+    });
+  });
 
   // eventos: abrir/fechar cartão
   lista.querySelectorAll(".cartao-resumo").forEach((el) => {
