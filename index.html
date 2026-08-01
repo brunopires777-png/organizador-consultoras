@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#6B2635">
+<title>Organizador de Consultoras</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Consultoras">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+  /* ===================== TOKENS ===================== */
+  :root{
+    --ink:#241F1C;
+    --ink-soft:#5A5049;
+    --parchment:#EFE6D3;
+    --parchment-deep:#E4D7BC;
+    --paper:#FBF7EE;
+    --oxblood:#6B2635;
+    --oxblood-deep:#4E1B27;
+    --brass:#B08D57;
+    --brass-light:#D8C08E;
+    --ativo:#3C6E47;
+    --ativo-bg:#E3EEE1;
+    --inativo:#A33B3B;
+    --inativo-bg:#F4E2DF;
+    --white:#FFFDF8;
+    --sombra: 0 6px 18px rgba(36,31,28,.14);
+    --sombra-suave: 0 2px 8px rgba(36,31,28,.10);
+    --raio: 14px;
+    --disp: 'Fraunces', serif;
+    --corpo: 'Inter', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:var(--corpo);
+    background:
+      radial-gradient(circle at 15% 0%, rgba(107,38,53,.06), transparent 55%),
+      var(--parchment);
+    color:var(--ink);
+    min-height:100vh;
+    -webkit-tap-highlight-color:transparent;
+  }
+  button{font-family:inherit;}
+  input,select{font-family:inherit;}
+  :focus-visible{outline:3px solid var(--brass); outline-offset:2px;}
+
+  /* ===================== TELA DE LOGIN ===================== */
+  #tela-login{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .cartao-login{
+    background:var(--paper);
+    border:1px solid var(--parchment-deep);
+    border-radius:20px;
+    box-shadow:var(--sombra);
+    padding:36px 28px 30px;
+    width:100%;
+    max-width:380px;
+    text-align:center;
+    position:relative;
+  }
+  .selo-login{
+    width:64px;height:64px;border-radius:50%;
+    margin:0 auto 14px;
+    background:radial-gradient(circle at 35% 30%, var(--oxblood) 0%, var(--oxblood-deep) 72%);
+    border:2px solid var(--brass-light);
+    display:flex;align-items:center;justify-content:center;
+    color:var(--brass-light);
+    font-family:var(--disp);font-weight:700;font-size:22px;
+    box-shadow: inset 0 0 0 3px rgba(0,0,0,.15), var(--sombra-suave);
+  }
+  .cartao-login h1{
+    font-family:var(--disp);
+    font-weight:600;
+    font-size:24px;
+    margin:0 0 4px;
+  }
+  .cartao-login p.sub{
+    color:var(--ink-soft);
+    font-size:13px;
+    margin:0 0 22px;
+    letter-spacing:.02em;
+  }
+  .campo-login{
+    text-align:left;
+    margin-bottom:14px;
+  }
+  .campo-login label{
+    display:block;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--ink-soft);
+    margin-bottom:5px;
+    font-weight:600;
+  }
+  .campo-login input{
+    width:100%;
+    padding:11px 13px;
+    border:1px solid var(--parchment-deep);
+    background:var(--white);
+    border-radius:10px;
+    font-size:15px;
+    color:var(--ink);
+  }
+  .btn-entrar{
+    width:100%;
+    margin-top:8px;
+    padding:13px;
+    border:none;
+    border-radius:10px;
+    background:var(--oxblood);
+    color:var(--white);
+    font-weight:600;
+    font-size:15px;
+    letter-spacing:.03em;
+    cursor:pointer;
+    transition:background .15s ease, transform .05s ease;
+  }
+  .btn-entrar:hover{background:var(--oxblood-deep);}
+  .btn-entrar:active{transform:scale(.98);}
+  .btn-entrar:disabled{opacity:.55;cursor:default;}
+  .erro-login{
+    color:var(--inativo);
+    font-size:13px;
+    margin-top:12px;
+    min-height:16px;
+  }
+
+  /* ===================== APP (pós login) ===================== */
+  #app{display:none;padding-bottom:60px;}
+  #app.visivel{display:block;}
+
+  header.topo{
+    background:var(--oxblood);
+    color:var(--white);
+    padding:18px 18px 0;
+    border-radius:0 0 22px 22px;
+    box-shadow:var(--sombra);
+  }
+  .topo-linha{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:16px;
+  }
+  .topo-titulo{
+    font-family:var(--disp);
+    font-weight:600;
+    font-size:20px;
+    letter-spacing:.01em;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .topo-titulo .selo-mini{
+    width:30px;height:30px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #7d3243, var(--oxblood-deep));
+    border:1.5px solid var(--brass-light);
+    flex-shrink:0;
+  }
+  .btn-sair{
+    background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.28);
+    color:var(--white);
+    padding:7px 13px;
+    border-radius:8px;
+    font-size:12.5px;
+    cursor:pointer;
+  }
+  .btn-sair:hover{background:rgba(255,255,255,.2);}
+
+  .abas{
+    display:flex;
+    gap:6px;
+    overflow-x:auto;
+  }
+  .aba{
+    padding:10px 16px 12px;
+    font-size:13.5px;
+    font-weight:600;
+    color:rgba(255,255,255,.62);
+    background:transparent;
+    border:none;
+    border-bottom:3px solid transparent;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .aba.ativa{
+    color:var(--white);
+    border-bottom-color:var(--brass-light);
+  }
+  .aba.futura{
+    color:rgba(255,255,255,.32);
+    cursor:default;
+  }
+
+  main{
+    max-width:640px;
+    margin:0 auto;
+    padding:18px 14px 0;
+  }
+
+  /* rótulo eyebrow tipo "ficha de caderneta" */
+  .eyebrow{
+    font-family:var(--disp);
+    font-weight:600;
+    font-size:13px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--oxblood);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin:22px 2px 10px;
+  }
+  .eyebrow::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:var(--parchment-deep);
+  }
+  .eyebrow:first-child{margin-top:4px;}
+
+  /* ===================== CARTÃO base (ficha) ===================== */
+  .ficha{
+    background:var(--paper);
+    border:1px solid var(--parchment-deep);
+    border-radius:var(--raio);
+    box-shadow:var(--sombra-suave);
+    padding:18px 16px;
+  }
+
+  /* ---- Cadastro ---- */
+  .grade-campos{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:12px;
+  }
+  .grade-2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+  .grade-endereco{
+    display:grid;
+    grid-template-columns:2.2fr 1fr;
+    gap:12px;
+  }
+  .campo label{
+    display:block;
+    font-size:11.5px;
+    text-transform:uppercase;
+    letter-spacing:.07em;
+    color:var(--ink-soft);
+    font-weight:600;
+    margin-bottom:5px;
+  }
+  .campo input[type=text],
+  .campo input[type=tel],
+  .campo input[type=email],
+  .campo input[type=number]{
+    width:100%;
+    padding:10px 11px;
+    border:none;
+    border-bottom:1.5px dashed var(--brass);
+    background:transparent;
+    font-size:14.5px;
+    color:var(--ink);
+  }
+  .campo input::placeholder{color:#B9AF9E;}
+
+  .grupo-data{
+    display:flex;
+    align-items:center;
+    gap:5px;
+  }
+  .grupo-data input{
+    text-align:center;
+    border:none;
+    border-bottom:1.5px dashed var(--brass);
+    background:transparent;
+    padding:9px 4px;
+    font-family:var(--mono);
+    font-size:14.5px;
+    color:var(--ink);
+  }
+  .grupo-data input.dia,.grupo-data input.mes{width:38px;}
+  .grupo-data input.ano{width:60px;}
+  .grupo-data span{color:var(--brass);font-weight:600;}
+  .grupo-data.desabilitado input{color:var(--ink-soft);}
+
+  .segmento{
+    display:flex;
+    gap:8px;
+  }
+  .segbtn{
+    flex:1;
+    padding:9px 8px;
+    border:1.5px solid var(--parchment-deep);
+    background:var(--white);
+    border-radius:9px;
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--ink-soft);
+    cursor:pointer;
+    transition:all .12s ease;
+  }
+  .segbtn.selecionado{
+    background:var(--oxblood);
+    border-color:var(--oxblood);
+    color:var(--white);
+  }
+
+  .linha-status{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding-top:6px;
+    border-top:1px dashed var(--parchment-deep);
+    margin-top:4px;
+  }
+  .linha-status .rotulo-status{
+    font-size:13px;
+    font-weight:600;
+    color:var(--ink-soft);
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+
+  /* Selo de status (elemento assinatura) */
+  .selo{
+    --cor-selo: var(--parchment-deep);
+    width:34px;height:34px;
+    border-radius:50%;
+    background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--cor-selo) 88%, white), var(--cor-selo));
+    border:2px solid rgba(0,0,0,.12);
+    cursor:pointer;
+    box-shadow: inset 0 0 0 3px rgba(255,255,255,.35), 0 2px 5px rgba(0,0,0,.18);
+    transition: transform .12s ease, box-shadow .12s ease;
+    flex-shrink:0;
+  }
+  .selo:active{transform:scale(.86);}
+  .selo.on{--cor-selo: var(--ativo);}
+  .selo.off{--cor-selo: var(--inativo);}
+  .selo.vazio{--cor-selo: var(--parchment-deep);}
+
+  .acoes-cadastro{
+    display:flex;
+    gap:8px;
+    margin-top:14px;
+  }
+  .btn{
+    border:none;
+    border-radius:9px;
+    padding:11px 10px;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:.02em;
+    cursor:pointer;
+    flex:1;
+    transition:filter .12s ease, transform .05s ease, opacity .12s ease;
+  }
+  .btn:active{transform:scale(.97);}
+  .btn:disabled{opacity:.4;cursor:default;}
+  .btn-fantasma{background:var(--white);border:1.5px solid var(--parchment-deep);color:var(--ink-soft);}
+  .btn-fantasma:hover:not(:disabled){background:var(--parchment);}
+  .btn-perigo{background:var(--white);border:1.5px solid var(--inativo);color:var(--inativo);}
+  .btn-perigo:hover:not(:disabled){background:var(--inativo-bg);}
+  .btn-principal{background:var(--oxblood);color:var(--white);}
+  .btn-principal:hover:not(:disabled){background:var(--oxblood-deep);}
+  .msg-cadastro{
+    font-size:12.5px;
+    margin-top:9px;
+    min-height:14px;
+    font-weight:600;
+  }
+  .msg-cadastro.ok{color:var(--ativo);}
+  .msg-cadastro.erro{color:var(--inativo);}
+
+  /* ---- Busca ---- */
+  .caixa-busca{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:12px 14px;
+  }
+  .caixa-busca input{
+    flex:1;
+    border:none;
+    background:transparent;
+    font-size:14.5px;
+    color:var(--ink);
+  }
+  .icone-busca{color:var(--brass);font-size:16px;}
+
+  /* ---- Filtro ---- */
+  .filtro-cabecalho{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    cursor:pointer;
+    padding:13px 14px;
+  }
+  .filtro-cabecalho .titulo-filtro{
+    font-weight:700;
+    font-size:14px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .seta-filtro{transition:transform .18s ease;color:var(--brass);}
+  .filtro-corpo{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .22s ease;
+  }
+  .filtro-corpo.aberto{max-height:520px;}
+  .filtro-conteudo{
+    padding:2px 14px 16px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    border-top:1px dashed var(--parchment-deep);
+  }
+  .filtro-conteudo .campo{padding-top:12px;}
+  .campo select{
+    width:100%;
+    padding:9px 8px;
+    border:1.5px solid var(--parchment-deep);
+    border-radius:8px;
+    background:var(--white);
+    font-size:13.5px;
+    color:var(--ink);
+  }
+  .filtro-rodape{
+    grid-column:1 / -1;
+    display:flex;
+    gap:8px;
+    margin-top:2px;
+  }
+
+  /* ---- Contador ---- */
+  .contador{
+    display:flex;
+    gap:10px;
+    margin:16px 2px 4px;
+  }
+  .pill{
+    flex:1;
+    padding:10px 12px;
+    border-radius:11px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    font-weight:700;
+    font-size:13.5px;
+  }
+  .pill-ativo{background:var(--ativo-bg);color:var(--ativo);}
+  .pill-inativo{background:var(--inativo-bg);color:var(--inativo);}
+  .pill .num{font-family:var(--mono);font-size:15px;}
+
+  /* ---- Lista ---- */
+  #lista-consultoras{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-top:8px;
+  }
+  .vazio-lista{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:13.5px;
+    padding:26px 10px;
+    background:var(--paper);
+    border:1px dashed var(--parchment-deep);
+    border-radius:var(--raio);
+  }
+
+  .cartao-consultora{
+    background:var(--paper);
+    border:1px solid var(--parchment-deep);
+    border-radius:12px;
+    box-shadow:var(--sombra-suave);
+    overflow:hidden;
+    position:relative;
+  }
+  .cartao-consultora::before{
+    content:"";
+    position:absolute;
+    left:0;top:0;bottom:0;
+    width:5px;
+    background:var(--cor-aba, var(--parchment-deep));
+  }
+  .cartao-consultora.status-on{--cor-aba:var(--ativo);}
+  .cartao-consultora.status-off{--cor-aba:var(--inativo);}
+
+  .cartao-resumo{
+    padding:13px 14px 13px 18px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    cursor:pointer;
+  }
+  .cartao-resumo .info-principal{flex:1;min-width:0;}
+  .cartao-resumo .nome{
+    font-weight:700;
+    font-size:15px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .cartao-resumo .linha-meta{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:4px;
+    font-size:12px;
+    color:var(--ink-soft);
+    font-family:var(--mono);
+  }
+  .nivel-chip{
+    background:var(--brass-light);
+    color:var(--oxblood-deep);
+    padding:1px 7px;
+    border-radius:999px;
+    font-weight:700;
+    font-size:11.5px;
+  }
+  .dias-status{
+    text-align:right;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.01em;
+    white-space:nowrap;
+  }
+  .dias-status.on{color:var(--ativo);}
+  .dias-status.off{color:var(--inativo);}
+  .selo-mini-status{
+    width:26px;height:26px;
+    flex-shrink:0;
+  }
+  .seta-cartao{
+    color:var(--brass);
+    transition:transform .18s ease;
+    flex-shrink:0;
+  }
+  .cartao-consultora.expandido .seta-cartao{transform:rotate(180deg);}
+
+  .cartao-detalhe{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .25s ease;
+  }
+  .cartao-consultora.expandido .cartao-detalhe{max-height:900px;}
+  .detalhe-conteudo{
+    padding:4px 16px 16px 18px;
+    border-top:1px dashed var(--parchment-deep);
+  }
+  .linha-detalhe{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    padding:7px 0;
+    border-bottom:1px solid var(--parchment);
+    font-size:13.5px;
+  }
+  .linha-detalhe .rotulo{color:var(--ink-soft);font-weight:600;flex-shrink:0;}
+  .linha-detalhe .valor{text-align:right;}
+  .linha-detalhe input{
+    text-align:right;
+    border:none;
+    border-bottom:1.5px dashed var(--brass);
+    background:transparent;
+    font-size:13.5px;
+    color:var(--ink);
+    width:60%;
+    font-family:inherit;
+  }
+  .linha-detalhe.edit .valor{color:var(--oxblood);}
+
+  .acoes-cartao{
+    display:flex;
+    gap:7px;
+    margin-top:14px;
+    flex-wrap:wrap;
+  }
+  .acoes-cartao .btn{flex:1 1 40%;font-size:12px;padding:9px 6px;}
+
+  footer.rodape-app{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:11.5px;
+    padding:26px 12px 10px;
+  }
+
+  @media (max-width:380px){
+    .grade-2{grid-template-columns:1fr;}
+    .filtro-conteudo{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== TELA DE LOGIN ===================== -->
+<div id="tela-login">
+  <div class="cartao-login">
+    <div class="selo-login">OC</div>
+    <h1>Organizador de Consultoras</h1>
+    <p class="sub">Acesso restrito &middot; entre com seu e-mail e senha</p>
+
+    <div class="campo-login">
+      <label for="login-email">E-mail</label>
+      <input type="email" id="login-email" autocomplete="username" placeholder="voce@exemplo.com">
+    </div>
+    <div class="campo-login">
+      <label for="login-senha">Senha</label>
+      <input type="password" id="login-senha" autocomplete="current-password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;">
+    </div>
+    <button class="btn-entrar" id="btn-login">Entrar</button>
+    <div class="erro-login" id="erro-login"></div>
+  </div>
+</div>
+
+<!-- ===================== APP ===================== -->
+<div id="app">
+  <header class="topo">
+    <div class="topo-linha">
+      <div class="topo-titulo"><span class="selo-mini"></span> Consultoras</div>
+      <button class="btn-sair" id="btn-sair">Sair</button>
+    </div>
+    <div class="abas">
+      <button class="aba ativa">Cadastro</button>
+      <button class="aba futura" title="Em breve">Pontuação &middot; em breve</button>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ---- CADASTRO ---- -->
+    <div class="eyebrow">Ficha de cadastro</div>
+    <div class="ficha">
+      <div class="grade-campos">
+
+        <div class="campo">
+          <label>Nome completo</label>
+          <input type="text" id="c-nome" placeholder="Nome completo da consultora">
+        </div>
+
+        <div class="grade-2">
+          <div class="campo">
+            <label>Data de nascimento</label>
+            <div class="grupo-data">
+              <input class="dia" id="c-nasc-dia" inputmode="numeric" maxlength="2" placeholder="DD">
+              <span>/</span>
+              <input class="mes" id="c-nasc-mes" inputmode="numeric" maxlength="2" placeholder="MM">
+              <span>/</span>
+              <input class="ano" id="c-nasc-ano" inputmode="numeric" maxlength="4" placeholder="AAAA">
+            </div>
+          </div>
+          <div class="campo">
+            <label>Estado civil</label>
+            <div class="segmento">
+              <button type="button" class="segbtn" data-civil="casada">Casada(o)</button>
+              <button type="button" class="segbtn" data-civil="solteira">Solteira(o)</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="grade-endereco">
+          <div class="campo">
+            <label>Endereço</label>
+            <input type="text" id="c-endereco" placeholder="Rua, avenida...">
+          </div>
+          <div class="campo">
+            <label>Nº</label>
+            <input type="text" id="c-numero" placeholder="Nº">
+          </div>
+        </div>
+
+        <div class="campo">
+          <label>Complemento</label>
+          <input type="text" id="c-complemento" placeholder="Apto, bloco, referência...">
+        </div>
+
+        <div class="grade-2">
+          <div class="campo">
+            <label>Bairro</label>
+            <input type="text" id="c-bairro" placeholder="Bairro">
+          </div>
+          <div class="campo">
+            <label>Cidade</label>
+            <input type="text" id="c-cidade" placeholder="Cidade">
+          </div>
+        </div>
+
+        <div class="grade-2">
+          <div class="campo">
+            <label>Telefone</label>
+            <input type="tel" id="c-telefone" placeholder="(00) 00000-0000">
+          </div>
+          <div class="campo">
+            <label>E-mail</label>
+            <input type="email" id="c-email" placeholder="email@exemplo.com">
+          </div>
+        </div>
+
+        <div class="campo">
+          <label>Data do cadastro</label>
+          <div class="grupo-data desabilitado">
+            <input class="dia" id="c-cad-dia" disabled>
+            <span>/</span>
+            <input class="mes" id="c-cad-mes" disabled>
+            <span>/</span>
+            <input class="ano" id="c-cad-ano" disabled>
+          </div>
+        </div>
+
+        <div class="linha-status">
+          <span class="rotulo-status">Ativo</span>
+          <div class="selo vazio" id="c-selo-ativo" data-ativo="false" title="Clique para marcar como ativo"></div>
+        </div>
+      </div>
+
+      <div class="acoes-cadastro">
+        <button class="btn btn-fantasma" id="btn-apagar">Apagar</button>
+        <button class="btn btn-perigo" id="btn-excluir-rascunho">Excluir</button>
+        <button class="btn btn-principal" id="btn-cadastrar">CADASTRAR</button>
+      </div>
+      <div class="msg-cadastro" id="msg-cadastro"></div>
+    </div>
+
+    <!-- ---- BUSCA ---- -->
+    <div class="eyebrow">Buscar</div>
+    <div class="ficha caixa-busca">
+      <span class="icone-busca">&#128269;</span>
+      <input type="text" id="busca-nome" placeholder="Buscar consultora pelo nome...">
+    </div>
+
+    <!-- ---- FILTRO ---- -->
+    <div class="ficha" style="padding:0;margin-top:12px;">
+      <div class="filtro-cabecalho" id="filtro-cabecalho">
+        <span class="titulo-filtro">&#9776; Filtro</span>
+        <span class="seta-filtro" id="seta-filtro">&#9660;</span>
+      </div>
+      <div class="filtro-corpo" id="filtro-corpo">
+        <div class="filtro-conteudo">
+          <div class="campo">
+            <label>Idade</label>
+            <select id="f-idade">
+              <option value="">Todas</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label>Mês de nascimento</label>
+            <select id="f-mes">
+              <option value="">Todos</option>
+              <option value="1">Janeiro</option><option value="2">Fevereiro</option>
+              <option value="3">Março</option><option value="4">Abril</option>
+              <option value="5">Maio</option><option value="6">Junho</option>
+              <option value="7">Julho</option><option value="8">Agosto</option>
+              <option value="9">Setembro</option><option value="10">Outubro</option>
+              <option value="11">Novembro</option><option value="12">Dezembro</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label>Estado civil</label>
+            <div class="segmento">
+              <button type="button" class="segbtn" data-fcivil="casada">Casada(o)</button>
+              <button type="button" class="segbtn" data-fcivil="solteira">Solteira(o)</button>
+            </div>
+          </div>
+          <div class="campo">
+            <label>Bairro</label>
+            <input type="text" id="f-bairro" placeholder="Bairro">
+          </div>
+          <div class="filtro-rodape">
+            <button class="btn btn-fantasma" id="btn-limpar-filtro">Limpar filtro</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---- CONTADOR ---- -->
+    <div class="contador">
+      <div class="pill pill-ativo">&#9679; <span class="num" id="num-ativos">0</span> ativas</div>
+      <div class="pill pill-inativo">&#9679; <span class="num" id="num-inativos">0</span> inativas</div>
+    </div>
+
+    <!-- ---- LISTA ---- -->
+    <div class="eyebrow">Lista de consultoras</div>
+    <div id="lista-consultoras">
+      <div class="vazio-lista" id="lista-vazia">Nenhuma consultora cadastrada ainda.</div>
+    </div>
+
+    <footer class="rodape-app">Organizador de Consultoras &middot; ficha digital</footer>
+  </main>
+</div>
+
+<script type="module">
+/* ============================================================
+   FIREBASE — troque pelos dados do SEU projeto (Firebase Console
+   → Configurações do projeto → Seus apps → SDK setup).
+   Este projeto deve ser um Firebase NOVO, separado do ESA.
+   ============================================================ */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import {
+  getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import {
+  getFirestore, collection, addDoc, onSnapshot, doc, updateDoc,
+  deleteDoc, serverTimestamp, query, orderBy, Timestamp
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "COLE_AQUI_A_API_KEY",
+  authDomain: "COLE_AQUI.firebaseapp.com",
+  projectId: "COLE_AQUI_O_PROJECT_ID",
+  storageBucket: "COLE_AQUI.appspot.com",
+  messagingSenderId: "COLE_AQUI",
+  appId: "COLE_AQUI"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const colRef = collection(db, "consultoras");
+
+/* ============================================================
+   LOGIN
+   ============================================================ */
+const telaLogin = document.getElementById("tela-login");
+const telaApp = document.getElementById("app");
+const btnLogin = document.getElementById("btn-login");
+const erroLogin = document.getElementById("erro-login");
+
+btnLogin.addEventListener("click", fazerLogin);
+document.getElementById("login-senha").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") fazerLogin();
+});
+
+function fazerLogin(){
+  const email = document.getElementById("login-email").value.trim();
+  const senha = document.getElementById("login-senha").value;
+  erroLogin.textContent = "";
+  if(!email || !senha){
+    erroLogin.textContent = "Preencha e-mail e senha.";
+    return;
+  }
+  btnLogin.disabled = true;
+  btnLogin.textContent = "Entrando...";
+  signInWithEmailAndPassword(auth, email, senha)
+    .catch((err) => {
+      erroLogin.textContent = traduzErroAuth(err.code);
+    })
+    .finally(() => {
+      btnLogin.disabled = false;
+      btnLogin.textContent = "Entrar";
+    });
+}
+
+function traduzErroAuth(codigo){
+  const mapa = {
+    "auth/invalid-email": "E-mail inválido.",
+    "auth/invalid-credential": "E-mail ou senha incorretos.",
+    "auth/wrong-password": "E-mail ou senha incorretos.",
+    "auth/user-not-found": "E-mail ou senha incorretos.",
+    "auth/too-many-requests": "Muitas tentativas. Aguarde um pouco e tente de novo."
+  };
+  return mapa[codigo] || "Não foi possível entrar. Tente novamente.";
+}
+
+document.getElementById("btn-sair").addEventListener("click", () => signOut(auth));
+
+onAuthStateChanged(auth, (user) => {
+  if(user){
+    telaLogin.style.display = "none";
+    telaApp.classList.add("visivel");
+    preencherDataCadastroHoje();
+    iniciarListaEmTempoReal();
+  } else {
+    telaLogin.style.display = "flex";
+    telaApp.classList.remove("visivel");
+  }
+});
+
+/* ============================================================
+   CADASTRO — novo registro
+   ============================================================ */
+const campo = (id) => document.getElementById(id);
+
+function preencherDataCadastroHoje(){
+  const hoje = new Date();
+  campo("c-cad-dia").value = String(hoje.getDate()).padStart(2,"0");
+  campo("c-cad-mes").value = String(hoje.getMonth()+1).padStart(2,"0");
+  campo("c-cad-ano").value = String(hoje.getFullYear());
+}
+
+// avanço automático entre os campos de data (dia -> mês -> ano)
+function ligarAutoAvanco(dia, mes, ano){
+  dia.addEventListener("input", () => { if(dia.value.length >= 2) mes.focus(); });
+  mes.addEventListener("input", () => { if(mes.value.length >= 2) ano.focus(); });
+}
+ligarAutoAvanco(campo("c-nasc-dia"), campo("c-nasc-mes"), campo("c-nasc-ano"));
+
+// segmento estado civil (cadastro)
+let civilSelecionado = "";
+document.querySelectorAll("[data-civil]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    civilSelecionado = (civilSelecionado === btn.dataset.civil) ? "" : btn.dataset.civil;
+    document.querySelectorAll("[data-civil]").forEach((b) =>
+      b.classList.toggle("selecionado", b.dataset.civil === civilSelecionado)
+    );
+  });
+});
+
+// selo Ativo no formulário de cadastro
+const seloCadastro = campo("c-selo-ativo");
+seloCadastro.addEventListener("click", () => {
+  const ativo = seloCadastro.dataset.ativo === "true";
+  definirSelo(seloCadastro, !ativo);
+});
+function definirSelo(el, ativo){
+  el.dataset.ativo = String(ativo);
+  el.classList.remove("vazio","on","off");
+  el.classList.add(ativo ? "on" : "off");
+}
+
+function limparFormularioCadastro(fecharRascunho){
+  ["c-nome","c-nasc-dia","c-nasc-mes","c-nasc-ano","c-endereco","c-numero",
+   "c-complemento","c-bairro","c-cidade","c-telefone","c-email"].forEach((id) => campo(id).value = "");
+  civilSelecionado = "";
+  document.querySelectorAll("[data-civil]").forEach((b) => b.classList.remove("selecionado"));
+  seloCadastro.dataset.ativo = "false";
+  seloCadastro.classList.remove("on","off");
+  seloCadastro.classList.add("vazio");
+  mensagemCadastro("", "");
+  if(fecharRascunho) preencherDataCadastroHoje();
+}
+
+document.getElementById("btn-apagar").addEventListener("click", () => limparFormularioCadastro(false));
+document.getElementById("btn-excluir-rascunho").addEventListener("click", () => limparFormularioCadastro(true));
+
+document.getElementById("btn-cadastrar").addEventListener("click", cadastrarConsultora);
+
+function mensagemCadastro(texto, tipo){
+  const el = campo("msg-cadastro");
+  el.textContent = texto;
+  el.className = "msg-cadastro" + (tipo ? " " + tipo : "");
+}
+
+async function cadastrarConsultora(){
+  const nome = campo("c-nome").value.trim();
+  if(!nome){
+    mensagemCadastro("Preencha ao menos o nome completo.", "erro");
+    return;
+  }
+
+  const dados = {
+    nome,
+    nascDia: campo("c-nasc-dia").value.trim(),
+    nascMes: campo("c-nasc-mes").value.trim(),
+    nascAno: campo("c-nasc-ano").value.trim(),
+    estadoCivil: civilSelecionado,
+    endereco: campo("c-endereco").value.trim(),
+    numero: campo("c-numero").value.trim(),
+    complemento: campo("c-complemento").value.trim(),
+    bairro: campo("c-bairro").value.trim(),
+    cidade: campo("c-cidade").value.trim(),
+    telefone: campo("c-telefone").value.trim(),
+    email: campo("c-email").value.trim(),
+    dataCadastro: `${campo("c-cad-dia").value}/${campo("c-cad-mes").value}/${campo("c-cad-ano").value}`,
+    ativo: seloCadastro.dataset.ativo === "true",
+    statusAlteradoEm: serverTimestamp(),
+    pontos: null,
+    nivel: "",
+    criadoEm: serverTimestamp()
+  };
+
+  const btn = document.getElementById("btn-cadastrar");
+  btn.disabled = true;
+  try{
+    await addDoc(colRef, dados);
+    mensagemCadastro("Consultora cadastrada com sucesso!", "ok");
+    limparFormularioCadastro(true);
+  }catch(err){
+    console.error(err);
+    mensagemCadastro("Erro ao cadastrar. Tente novamente.", "erro");
+  }finally{
+    btn.disabled = false;
+  }
+}
+
+/* ============================================================
+   FILTRO (colapsável)
+   ============================================================ */
+const filtroCabecalho = document.getElementById("filtro-cabecalho");
+const filtroCorpo = document.getElementById("filtro-corpo");
+const setaFiltro = document.getElementById("seta-filtro");
+filtroCabecalho.addEventListener("click", () => {
+  filtroCorpo.classList.toggle("aberto");
+  setaFiltro.style.transform = filtroCorpo.classList.contains("aberto") ? "rotate(180deg)" : "rotate(0)";
+});
+
+let filtroCivil = "";
+document.querySelectorAll("[data-fcivil]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    filtroCivil = (filtroCivil === btn.dataset.fcivil) ? "" : btn.dataset.fcivil;
+    document.querySelectorAll("[data-fcivil]").forEach((b) =>
+      b.classList.toggle("selecionado", b.dataset.fcivil === filtroCivil)
+    );
+    renderizarLista();
+  });
+});
+
+document.getElementById("f-idade").addEventListener("change", renderizarLista);
+document.getElementById("f-mes").addEventListener("change", renderizarLista);
+document.getElementById("f-bairro").addEventListener("input", renderizarLista);
+document.getElementById("busca-nome").addEventListener("input", renderizarLista);
+
+document.getElementById("btn-limpar-filtro").addEventListener("click", () => {
+  filtroCivil = "";
+  document.querySelectorAll("[data-fcivil]").forEach((b) => b.classList.remove("selecionado"));
+  campo("f-idade").value = "";
+  campo("f-mes").value = "";
+  campo("f-bairro").value = "";
+  renderizarLista();
+});
+
+function calcularIdade(nascDia, nascMes, nascAno){
+  if(!nascDia || !nascMes || !nascAno) return null;
+  const hoje = new Date();
+  const nasc = new Date(Number(nascAno), Number(nascMes)-1, Number(nascDia));
+  if(isNaN(nasc.getTime())) return null;
+  let idade = hoje.getFullYear() - nasc.getFullYear();
+  const aindaNaoFezAniversario =
+    (hoje.getMonth() < nasc.getMonth()) ||
+    (hoje.getMonth() === nasc.getMonth() && hoje.getDate() < nasc.getDate());
+  if(aindaNaoFezAniversario) idade--;
+  return idade;
+}
+
+function atualizarOpcoesIdade(consultoras){
+  const idades = new Set();
+  consultoras.forEach((c) => {
+    const i = calcularIdade(c.nascDia, c.nascMes, c.nascAno);
+    if(i !== null) idades.add(i);
+  });
+  const select = campo("f-idade");
+  const atual = select.value;
+  select.innerHTML = '<option value="">Todas</option>' +
+    [...idades].sort((a,b)=>a-b).map((i)=>`<option value="${i}">${i} anos</option>`).join("");
+  select.value = atual;
+}
+
+/* ============================================================
+   CONTAGEM DE DIAS DESDE A ÚLTIMA MUDANÇA DE STATUS
+   ============================================================ */
+function diasDesde(timestamp){
+  if(!timestamp) return 0;
+  const data = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+  const diffMs = Date.now() - data.getTime();
+  return Math.max(0, Math.floor(diffMs / (1000*60*60*24)));
+}
+
+function formatarDias(qtdDias){
+  if(qtdDias < 30) return `${qtdDias} DIA${qtdDias === 1 ? "" : "S"}`;
+  const meses = Math.floor(qtdDias / 30);
+  const dias = qtdDias % 30;
+  const partMeses = `${meses} MÊS${meses === 1 ? "" : "ES"}`;
+  return dias > 0 ? `${partMeses} E ${dias} DIA${dias === 1 ? "" : "S"}` : partMeses;
+}
+
+/* ============================================================
+   LISTA EM TEMPO REAL (Firestore)
+   ============================================================ */
+let todasConsultoras = [];
+
+function iniciarListaEmTempoReal(){
+  const q = query(colRef, orderBy("nome"));
+  onSnapshot(q, (snap) => {
+    todasConsultoras = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    atualizarOpcoesIdade(todasConsultoras);
+    renderizarLista();
+  }, (err) => {
+    console.error("Erro ao carregar consultoras:", err);
+  });
+}
+
+function renderizarLista(){
+  const termoBusca = campo("busca-nome").value.trim().toLowerCase();
+  const idadeFiltro = campo("f-idade").value;
+  const mesFiltro = campo("f-mes").value;
+  const bairroFiltro = campo("f-bairro").value.trim().toLowerCase();
+
+  const filtradas = todasConsultoras.filter((c) => {
+    if(termoBusca && !c.nome.toLowerCase().includes(termoBusca)) return false;
+    if(idadeFiltro !== "" && String(calcularIdade(c.nascDia,c.nascMes,c.nascAno)) !== idadeFiltro) return false;
+    if(mesFiltro !== "" && String(Number(c.nascMes)) !== mesFiltro) return false;
+    if(filtroCivil && c.estadoCivil !== filtroCivil) return false;
+    if(bairroFiltro && !(c.bairro || "").toLowerCase().includes(bairroFiltro)) return false;
+    return true;
+  });
+
+  const ativas = todasConsultoras.filter((c) => c.ativo).length;
+  const inativas = todasConsultoras.length - ativas;
+  campo("num-ativos").textContent = ativas;
+  campo("num-inativos").textContent = inativas;
+
+  const lista = document.getElementById("lista-consultoras");
+  const idsExpandidos = new Set(
+    [...lista.querySelectorAll(".cartao-consultora.expandido")].map((el) => el.dataset.id)
+  );
+
+  if(filtradas.length === 0){
+    lista.innerHTML = `<div class="vazio-lista" id="lista-vazia">
+      ${todasConsultoras.length === 0 ? "Nenhuma consultora cadastrada ainda." : "Nenhum resultado para esse filtro/busca."}
+    </div>`;
+    return;
+  }
+
+  lista.innerHTML = filtradas.map((c) => montarCartao(c, idsExpandidos.has(c.id))).join("");
+
+  // eventos: abrir/fechar cartão
+  lista.querySelectorAll(".cartao-resumo").forEach((el) => {
+    el.addEventListener("click", () => {
+      el.closest(".cartao-consultora").classList.toggle("expandido");
+    });
+  });
+
+  // eventos: selo de status (mini, no resumo)
+  lista.querySelectorAll(".selo-mini-status").forEach((el) => {
+    el.addEventListener("click", (e) => {
+      e.stopPropagation();
+      alternarStatus(el.dataset.id, todasConsultoras);
+    });
+  });
+
+  // eventos: cada cartão expandido (editar/apagar/excluir/salvar)
+  lista.querySelectorAll(".cartao-consultora").forEach((cartaoEl) => ligarEventosCartao(cartaoEl));
+}
+
+function montarCartao(c, expandido){
+  const idade = calcularIdade(c.nascDia, c.nascMes, c.nascAno);
+  const dias = formatarDias(diasDesde(c.statusAlteradoEm));
+  const statusClasse = c.ativo ? "on" : "off";
+
+  return `
+  <div class="cartao-consultora status-${statusClasse} ${expandido ? "expandido" : ""}" data-id="${c.id}">
+    <div class="cartao-resumo">
+      <div class="selo selo-mini-status ${statusClasse}" data-id="${c.id}" title="Clique para alternar status"></div>
+      <div class="info-principal">
+        <div class="nome">${escapeHtml(c.nome)}</div>
+        <div class="linha-meta">
+          <span>Pontos: ${c.pontos !== null && c.pontos !== undefined && c.pontos !== "" ? c.pontos : "—"}</span>
+          ${c.nivel ? `<span class="nivel-chip">${escapeHtml(c.nivel)}</span>` : ""}
+        </div>
+      </div>
+      <div class="dias-status ${statusClasse}">${c.ativo ? "ATIVA(O)" : "INATIVA(O)"}<br>${dias}</div>
+      <span class="seta-cartao">&#9660;</span>
+    </div>
+    <div class="cartao-detalhe">
+      <div class="detalhe-conteudo" data-modo="leitura">
+        ${linhaDetalhe("Nome completo","nome",c.nome,"text")}
+        ${linhaDetalheData("Data de nascimento","nasc",c)}
+        ${linhaDetalheCivil(c)}
+        ${linhaDetalhe("Endereço","endereco",c.endereco,"text")}
+        ${linhaDetalhe("Número","numero",c.numero,"text")}
+        ${linhaDetalhe("Complemento","complemento",c.complemento,"text")}
+        ${linhaDetalhe("Bairro","bairro",c.bairro,"text")}
+        ${linhaDetalhe("Cidade","cidade",c.cidade,"text")}
+        ${linhaDetalhe("Telefone","telefone",c.telefone,"tel")}
+        ${linhaDetalhe("E-mail","email",c.email,"email")}
+        <div class="linha-detalhe"><span class="rotulo">Data do cadastro</span><span class="valor">${c.dataCadastro || "—"}</span></div>
+        ${linhaDetalhe("Pontos","pontos",c.pontos,"number")}
+        ${linhaDetalhe("Nível","nivel",c.nivel,"text")}
+      </div>
+      <div class="acoes-cartao">
+        <button class="btn btn-fantasma btn-editar">Editar</button>
+        <button class="btn btn-fantasma btn-apagar-edicao" disabled>Apagar</button>
+        <button class="btn btn-perigo btn-excluir-cadastro">Excluir cadastro</button>
+        <button class="btn btn-principal btn-salvar" disabled>Salvar</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function linhaDetalhe(rotulo, campoNome, valor, tipo){
+  const v = (valor === undefined || valor === null) ? "" : valor;
+  return `<div class="linha-detalhe" data-campo="${campoNome}" data-tipo="${tipo}">
+    <span class="rotulo">${rotulo}</span>
+    <span class="valor" data-valor-original="${escapeHtml(String(v))}">${v !== "" ? escapeHtml(String(v)) : "—"}</span>
+  </div>`;
+}
+
+function linhaDetalheData(rotulo, prefixo, c){
+  const d = c[prefixo+"Dia"] || "", m = c[prefixo+"Mes"] || "", a = c[prefixo+"Ano"] || "";
+  const texto = (d && m && a) ? `${d}/${m}/${a}` : "—";
+  return `<div class="linha-detalhe" data-campo="${prefixo}" data-tipo="data">
+    <span class="rotulo">${rotulo}</span>
+    <span class="valor" data-dia="${d}" data-mes="${m}" data-ano="${a}">${texto}</span>
+  </div>`;
+}
+
+function linhaDetalheCivil(c){
+  const texto = c.estadoCivil === "casada" ? "Casada(o)" : (c.estadoCivil === "solteira" ? "Solteira(o)" : "—");
+  return `<div class="linha-detalhe" data-campo="estadoCivil" data-tipo="civil">
+    <span class="rotulo">Estado civil</span>
+    <span class="valor" data-valor-original="${c.estadoCivil || ""}">${texto}</span>
+  </div>`;
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, (m) => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[m]));
+}
+
+/* ---- alternar status (selo) direto na lista ---- */
+async function alternarStatus(id, lista){
+  const c = lista.find((x) => x.id === id);
+  if(!c) return;
+  try{
+    await updateDoc(doc(db,"consultoras",id), {
+      ativo: !c.ativo,
+      statusAlteradoEm: serverTimestamp()
+    });
+  }catch(err){
+    console.error(err);
+    alert("Não foi possível atualizar o status. Tente novamente.");
+  }
+}
+
+/* ---- editar / apagar / excluir / salvar dentro do cartão expandido ---- */
+function ligarEventosCartao(cartaoEl){
+  const id = cartaoEl.dataset.id;
+  const conteudo = cartaoEl.querySelector(".detalhe-conteudo");
+  const btnEditar = cartaoEl.querySelector(".btn-editar");
+  const btnApagar = cartaoEl.querySelector(".btn-apagar-edicao");
+  const btnExcluir = cartaoEl.querySelector(".btn-excluir-cadastro");
+  const btnSalvar = cartaoEl.querySelector(".btn-salvar");
+
+  btnEditar.addEventListener("click", (e) => {
+    e.stopPropagation();
+    entrarModoEdicao(conteudo);
+    btnApagar.disabled = false;
+    btnSalvar.disabled = true;
+    btnEditar.disabled = true;
+  });
+
+  btnApagar.addEventListener("click", (e) => {
+    e.stopPropagation();
+    conteudo.querySelectorAll("input").forEach((inp) => { inp.value = ""; });
+    conteudo.querySelectorAll("[data-fcivil-edit]").forEach((b) => b.classList.remove("selecionado"));
+    btnSalvar.disabled = false;
+  });
+
+  btnExcluir.addEventListener("click", async (e) => {
+    e.stopPropagation();
+    if(!confirm("Excluir este cadastro definitivamente? Essa ação não pode ser desfeita.")) return;
+    try{
+      await deleteDoc(doc(db,"consultoras",id));
+    }catch(err){
+      console.error(err);
+      alert("Não foi possível excluir. Tente novamente.");
+    }
+  });
+
+  conteudo.addEventListener("input", () => {
+    if(conteudo.dataset.modo === "edicao") btnSalvar.disabled = false;
+  });
+
+  btnSalvar.addEventListener("click", async (e) => {
+    e.stopPropagation();
+    const dadosAtualizados = coletarDadosEdicao(conteudo);
+    btnSalvar.disabled = true;
+    try{
+      await updateDoc(doc(db,"consultoras",id), dadosAtualizados);
+      conteudo.dataset.modo = "leitura";
+      btnEditar.disabled = false;
+      btnApagar.disabled = true;
+    }catch(err){
+      console.error(err);
+      alert("Não foi possível salvar. Tente novamente.");
+      btnSalvar.disabled = false;
+    }
+  });
+}
+
+function entrarModoEdicao(conteudo){
+  conteudo.dataset.modo = "edicao";
+  conteudo.querySelectorAll(".linha-detalhe").forEach((linha) => {
+    const tipo = linha.dataset.tipo;
+    const valorSpan = linha.querySelector(".valor");
+
+    if(tipo === "data"){
+      const d = valorSpan.dataset.dia, m = valorSpan.dataset.mes, a = valorSpan.dataset.ano;
+      valorSpan.innerHTML = `
+        <span class="grupo-data" style="justify-content:flex-end;">
+          <input class="dia" data-edit="dia" maxlength="2" value="${d}" style="width:32px;">/
+          <input class="mes" data-edit="mes" maxlength="2" value="${m}" style="width:32px;">/
+          <input class="ano" data-edit="ano" maxlength="4" value="${a}" style="width:56px;">
+        </span>`;
+    } else if(tipo === "civil"){
+      const atual = valorSpan.dataset.valorOriginal;
+      valorSpan.innerHTML = `
+        <span class="segmento" style="gap:5px;">
+          <button type="button" class="segbtn" data-fcivil-edit="casada" style="padding:5px 8px;font-size:11.5px;">Casada(o)</button>
+          <button type="button" class="segbtn" data-fcivil-edit="solteira" style="padding:5px 8px;font-size:11.5px;">Solteira(o)</button>
+        </span>`;
+      valorSpan.querySelectorAll("[data-fcivil-edit]").forEach((b) => {
+        if(b.dataset.fcivilEdit === atual) b.classList.add("selecionado");
+        b.addEventListener("click", () => {
+          const jaSelecionado = b.classList.contains("selecionado");
+          valorSpan.querySelectorAll("[data-fcivil-edit]").forEach((x) => x.classList.remove("selecionado"));
+          if(!jaSelecionado) b.classList.add("selecionado");
+          valorSpan.dataset.valorOriginal = jaSelecionado ? "" : b.dataset.fcivilEdit;
+          conteudo.closest(".cartao-consultora").querySelector(".btn-salvar").disabled = false;
+        });
+      });
+    } else {
+      const original = valorSpan.dataset.valorOriginal || "";
+      const tipoInput = tipo === "number" ? "number" : (tipo === "email" ? "email" : (tipo === "tel" ? "tel" : "text"));
+      valorSpan.innerHTML = `<input type="${tipoInput}" data-edit="valor" value="${original}">`;
+    }
+  });
+}
+
+function coletarDadosEdicao(conteudo){
+  const dados = {};
+  conteudo.querySelectorAll(".linha-detalhe").forEach((linha) => {
+    const campoNome = linha.dataset.campo;
+    const tipo = linha.dataset.tipo;
+    const valorSpan = linha.querySelector(".valor");
+
+    if(tipo === "data"){
+      dados[campoNome+"Dia"] = valorSpan.querySelector('[data-edit="dia"]')?.value.trim() || "";
+      dados[campoNome+"Mes"] = valorSpan.querySelector('[data-edit="mes"]')?.value.trim() || "";
+      dados[campoNome+"Ano"] = valorSpan.querySelector('[data-edit="ano"]')?.value.trim() || "";
+    } else if(tipo === "civil"){
+      dados.estadoCivil = valorSpan.dataset.valorOriginal || "";
+    } else {
+      const input = valorSpan.querySelector('[data-edit="valor"]');
+      if(input){
+        dados[campoNome] = tipo === "number"
+          ? (input.value === "" ? null : Number(input.value))
+          : input.value.trim();
+      }
+    }
+  });
+  return dados;
+}
+</script>
+</body>
+</html>
